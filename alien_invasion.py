@@ -10,7 +10,7 @@ class AlienInvasion:
     """Overall Class to manage game assets and behavior."""
 
     def __init__(self):
-        """Initilize Game and create Game Resources."""
+        """Initialize Game and create Game Resources."""
 
         pygame.init()
         self.clock = pygame.time.Clock()
@@ -28,13 +28,7 @@ class AlienInvasion:
         while True:
             self._check_events()
             self.ship.update()
-            self.bullets.update()
-
-            # Get rid of bulltes out of screen:
-            for bullet in self.bullets.copy():
-                if bullet.rect.bottom <= 0:
-                    self.bullets.remove(bullet)
-            print(f"Current Bullets in memory: {len(self.bullets)}")
+            self._update_bullets()
 
             self._update_screen()            
             self.clock.tick(60)
@@ -61,6 +55,7 @@ class AlienInvasion:
             sys.exit()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
+            print(f"Current Bullets in memory: {len(self.bullets)}")
 
     def _check_keyup_events(self, event):
         """Respond to key releases"""
@@ -79,11 +74,22 @@ class AlienInvasion:
 
         # Make the most recently draw screen visible.
         pygame.display.flip()
+    
+    def _update_bullets(self):
+        """Update position of bullets and get rid of old bullets"""
+        self.bullets.update()
+
+        # Get rid of bullets out of screen:
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
+                print(f"Current Bullets in memory: {len(self.bullets)}")
 
     def _fire_bullet(self):
         """Create a new bullet in front of the ship and add to the bullets group"""
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
+        if (len(self.bullets) < self.settings.bullets_allowed):
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
 
 
 if __name__ ==  '__main__':
