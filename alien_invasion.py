@@ -1,7 +1,7 @@
 import sys
 
 import pygame
-import random
+from random import randint
 
 from settings import Settings
 from ship import Ship
@@ -79,16 +79,14 @@ class AlienInvasion:
         alien_width, alien_height = alien.rect.size
 
         current_x, current_y = alien_width, alien_height
-        while current_y < (self.settings.screen_height - 3*alien_height):
-            while current_x < (self.settings.screen_width - 2*alien_width):
+        while current_y < (self.settings.screen_height - 3 * alien_height):
+            while current_x < (self.settings.screen_width - 2 * alien_width):
                 self._create_alien(current_x, current_y)
                 current_x += 2 * alien_width
 
             # Finished a row: reset x value and increment y
-            current_x = alien_width + random.randint(-40, 40)
+            current_x = alien_width + randint(-40, 40)
             current_y += 2 * alien_height
-
-        
 
     def _create_alien(self, x_position, y_position):
         """Create an Alien and place it in the row."""
@@ -98,7 +96,20 @@ class AlienInvasion:
         new_alien.rect.y = y_position
         self.aliens.add(new_alien)
 
+    def _check_fleet_edges(self):
+        """Respond appropriately if any aliens have reached the edge."""
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                self._change_fleet_direction()
+                break
 
+
+
+    def _change_fleet_direction(self):
+        """Drop the entire fleet and change the movement direction."""
+        self.settings.fleet_direction *= -1
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.settings.fleet_drop_speed
     
     def _update_screen(self):
         """Update images on the screen, and flip to new screen."""
@@ -122,6 +133,8 @@ class AlienInvasion:
                 self.bullets.remove(bullet)
                 print(f"Current Bullets in memory: {len(self.bullets)}")
 
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+
     def _fire_bullet(self):
         """Create a new bullet in front of the ship and add to the bullets group"""
         if (len(self.bullets) < self.settings.bullets_allowed):
@@ -129,7 +142,8 @@ class AlienInvasion:
             self.bullets.add(new_bullet)
 
     def _update_aliens(self):
-        """Update the positions of aliens in the fleet"""
+        """Check if fleet is at an edge, then update the positions"""
+        self._check_fleet_edges()
         self.aliens.update()
 
 if __name__ ==  '__main__':
