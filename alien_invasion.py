@@ -175,12 +175,17 @@ class AlienInvasion:
             for aliens in collisions.values():
                 self.stats.score += self.settings.alien_points * len(aliens)    
             self.sb.prep_score()
+            self.sb.check_new_high_score()
 
         if not self.aliens:
             # Reset Bullets and Spawn new aliens
             self.bullets.empty()
             self._create_fleet()
             self.settings.increase_speed()
+
+            # Increase level
+            self.stats.level += 1
+            self.sb.prep_level()
 
     def _fire_bullet(self):
         """Create a new bullet in front of the ship and add to the bullets group"""
