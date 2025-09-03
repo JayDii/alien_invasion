@@ -81,6 +81,8 @@ class AlienInvasion:
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
             print(f"Current Bullets in memory: {len(self.bullets)}")
+        elif event.key == pygame.K_p and not self.game_active:
+            self._start_game()
 
     def _check_keyup_events(self, event):
         """Respond to key releases"""
@@ -167,6 +169,7 @@ class AlienInvasion:
             # Reset Bullets and Spawn new aliens
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
 
     def _fire_bullet(self):
         """Create a new bullet in front of the ship and add to the bullets group"""
@@ -193,6 +196,7 @@ class AlienInvasion:
             self.stats.ships_left =- 1
         else:
             self.game_active = False
+            pygame.mouse.set_visible(True)
 
         # Get rid of any objects on screen
         self.bullets.empty()
@@ -215,8 +219,26 @@ class AlienInvasion:
 
     def _check_play_button(self, mouse_pos):
         """Start a new game when the player clicks play."""
-        if self.play_button.rect.collidepoint(mouse_pos):
-            self.game_active = True
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        if button_clicked and not self.game_active:
+            self._start_game()
+            
+    def _start_game(self):
+        # Reset game statistic
+        self.stats.reset_stats()
+        self.settings.initialize_dynamic_settings()
+        self.game_active = True
+
+        # Get rid of remaining stuff
+        self.aliens.empty()
+        self.bullets.empty()
+
+        # Create a new fleet and center ship.
+        self._create_fleet()
+        self.ship.center_ship()
+
+        # Hide mouse cursor 
+        pygame.mouse.set_visible(False)
     
 if __name__ ==  '__main__':
     # Make game instance, and run the game
