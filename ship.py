@@ -1,10 +1,12 @@
 import pygame 
+from pygame.sprite import Sprite
 
-class Ship:
+class Ship(Sprite):
     """A class to manage the ship."""
 
     def __init__(self, ai_game):
         """Initialize ship and set Starting position."""
+        super().__init__()
         self.screen = ai_game.screen
         self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
@@ -22,6 +24,9 @@ class Ship:
         # Movement flags; start with a ship that is not moving
         self.moving_right = False
         self.moving_left = False
+
+        # Firing flag
+        self.firing = False
 
     def update(self):
         """Update the ships position based on movement flags"""

@@ -28,13 +28,16 @@ class AlienInvasion:
         pygame.display.set_caption("Alien Invasion")
 
         # Create game statistics and scoreboard
-        self.stats = GameStats(self)
-        self.sb = Scoreboard(self)
-
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
 
+
+
+        self.stats = GameStats(self)
+        self.sb = Scoreboard(self)
+
+        
         self._create_fleet()
 
         # Start Alien Invasion in an inactive state
@@ -45,6 +48,8 @@ class AlienInvasion:
 
     def run_game(self):
         """Start the main Loop for the game."""
+
+        frame = 0
         while True:
             self._check_events()
 
@@ -52,9 +57,14 @@ class AlienInvasion:
                 self.ship.update()
                 self._update_bullets()
                 self._update_aliens()
+                self.sb.prep_ammo_left()
+                if frame % 10 == 0:
+                    # print(f"Frame: {frame}.")
+                    self._fire_bullet()
 
             self._update_screen()            
             self.clock.tick(60)
+            frame = (frame + 1) % 60
 
     def _check_events(self):
         """Respond to key presses and mouse events."""
@@ -81,7 +91,7 @@ class AlienInvasion:
         elif event.key == pygame.K_q:
             sys.exit()
         elif event.key == pygame.K_SPACE:
-            self._fire_bullet()
+            self.ship.firing = True
             print(f"Current Bullets in memory: {len(self.bullets)}")
         elif event.key == pygame.K_p and not self.game_active:
             self._start_game()
@@ -92,6 +102,8 @@ class AlienInvasion:
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
+        elif event.key == pygame.K_SPACE:
+            self.ship.firing = False
 
     def _create_fleet(self):
         """Create alien fleet"""
@@ -189,9 +201,10 @@ class AlienInvasion:
 
     def _fire_bullet(self):
         """Create a new bullet in front of the ship and add to the bullets group"""
-        if (len(self.bullets) < self.settings.bullets_allowed):
-            new_bullet = Bullet(self)
-            self.bullets.add(new_bullet)
+        if self.ship.firing:
+            if (len(self.bullets) < self.settings.bullets_allowed):
+                new_bullet = Bullet(self)
+                self.bullets.add(new_bullet)
 
     def _update_aliens(self):
         """Check if fleet is at an edge, then update the positions"""
@@ -208,9 +221,12 @@ class AlienInvasion:
     def _ship_hit(self):
         """Respond to ship beeing hit by an alien."""
         # Decrement "Lives"/ Ships left
-        if self.stats.ships_left > 0:
-            self.stats.ships_left =- 1
+        if self.stats.ships_left > 1:
+            self.stats.ships_left -= 1
+            self.sb.prep_ships()
         else:
+            self.stats.ships_left -= 1
+            self.sb.prep_ships()
             self.game_active = False
             pygame.mouse.set_visible(True)
 
@@ -243,6 +259,7 @@ class AlienInvasion:
         # Reset game statistic
         self.stats.reset_stats()
         self.sb.prep_score()
+        self.sb.prep_ships()
         self.settings.initialize_dynamic_settings()
         self.game_active = True
 
