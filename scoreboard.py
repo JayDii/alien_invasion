@@ -53,7 +53,7 @@ class Scoreboard:
     def prep_ammo_left(self):
         """Display the Shots ready depending on the bullet amount allowed"""
         current_ammo = self.settings.bullets_allowed - len(self.ai_game.bullets)
-        ammo_str = f"Energy: {current_ammo} / {self.settings.bullets_allowed}"
+        ammo_str = f"{current_ammo} / {self.settings.bullets_allowed}"
         self.ammo_image = self.font.render(ammo_str, True, self.text_color, self.settings.bg_color)
 
         # Display on bottom right
